@@ -1,18 +1,16 @@
 import Head from 'next/head'
-import { NextPage } from "next";
 import { Layout } from "@/styles";
+import { getNextFiveYears } from '@/lib/helpers';
 
-interface Props {
-  launch: {
-    asd: string
-  }
-}
+const IndexPage = () => {
 
-const IndexPage: NextPage<Props> = ({ launch }) => {
-  const date = new Date(launch.asd)
+  let years = getNextFiveYears();
+
   return (
     <Layout>
-    
+      {years.map((year) => (
+        <button>{year}</button>
+      ))}
     </Layout>
   )
 }
