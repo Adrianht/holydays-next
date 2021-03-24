@@ -1,6 +1,7 @@
 import { fetchHoliday, fetchLongWeekend, getNextFiveYears } from "@/lib/helpers";
 import { Container, Weekend } from "@/styles";
 import { format, parseISO, eachDayOfInterval, isWeekend } from "date-fns";
+import { GetStaticProps } from "next";
 
 export async function getStaticPaths() {
   const paths = getNextFiveYears();
@@ -15,10 +16,11 @@ export async function getStaticPaths() {
   }
 }
 
-export async function getStaticProps({params}) {
-  const path = params.slug
-  const longWeekends = await fetchLongWeekend(path)
-  const holidays = await fetchHoliday(path)
+export const getStaticProps: GetStaticProps<{parsedWeekends: SingleWeekend[], holidays: HolidayObjectProp[]}> = async ({params}) => {
+  const path = params?.slug!
+  const singlePath = Array.isArray(path) ? path[0] : path;
+  const longWeekends = await fetchLongWeekend(singlePath)
+  const holidays = await fetchHoliday(singlePath)
   const parsedWeekends = JSON.parse(longWeekends);
   return {
     props: {
@@ -28,31 +30,49 @@ export async function getStaticProps({params}) {
   }
 }
 
+interface HolidayObjectProp {
+    date: string,
+    localName: string,
+    name: string,
+    countryCode: string,
+    fixed: boolean,
+    global: boolean,
+    counties?: any,
+    launchYear?: any,
+    type: string
+}
 
-const Main = ({ parsedWeekends, holidays }) => {
+interface SingleWeekend {
+  startDate: string,
+  endDate: string,
+  dayCount: number,
+  needBridgeDay: boolean
+}
 
-  // let correct = JSON.parse(longWeekends);
-  const onlyDates = array => {
-    const dates = [];
-    array.forEach(element => {
+
+const Main: React.FC<{parsedWeekends: SingleWeekend[], holidays: HolidayObjectProp[]}> = ({ parsedWeekends, holidays }) => {
+  console.log("ASDASD", parsedWeekends)
+  const onlyDates = (array: HolidayObjectProp[]) => {
+    const dates: string[] = [];
+    array.forEach((element: HolidayObjectProp) => {
       dates.push(format(parseISO(element.date), 'dd/MM/yyyy'));
     });
     return dates;
   }
 
-  const dayName = (weekend, day) => {
+  const dayName = (weekend: SingleWeekend, day: number) => {
     const all = allDays(weekend);
 
     return format(all[day], 'eeee dd, MMMM');
   }
 
-  const allDays = weekend => {
+  const allDays = (weekend: SingleWeekend) => {
     const start = parseISO(weekend.startDate);
     const end = parseISO(weekend.endDate);
     return eachDayOfInterval({ start, end });
   }
 
-  const dayIsBridgeDay = (weekend, day) => {
+  const dayIsBridgeDay = (weekend:SingleWeekend, day:number) => {
     if (!weekend.needBridgeDay) {
       return '';
     }
@@ -62,7 +82,7 @@ const Main = ({ parsedWeekends, holidays }) => {
 
     const onlyDays = onlyDates(holidays)
     const exists = onlyDays.includes(currentDay);
-    
+
     if (exists) {
       return '';
     }
@@ -79,7 +99,7 @@ const Main = ({ parsedWeekends, holidays }) => {
   
   return(
     <Container>
-      {parsedWeekends.map((weekend, index) => (
+      {parsedWeekends.map((weekend: SingleWeekend, index: number) => (
         <div key={index}>
           <p className="weekend-title">Long weekend {index + 1}</p>
           <Weekend>
@@ -90,8 +110,6 @@ const Main = ({ parsedWeekends, holidays }) => {
         </div>
 
       ))}
-
-      {/* {parsedWeekends} */}
     </Container>
   )
 }
