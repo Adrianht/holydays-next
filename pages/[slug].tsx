@@ -17,7 +17,7 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps<{
-  parsedWeekends: SingleWeekend[]
+  longWeekends: SingleWeekend[]
   holidays: HolidayObjectProp[]
 }> = async ({ params }) => {
   // eslint-disable-next-line
@@ -25,10 +25,9 @@ export const getStaticProps: GetStaticProps<{
   const singlePath = Array.isArray(path) ? path[0] : path
   const longWeekends = await fetchLongWeekend(singlePath)
   const holidays = await fetchHoliday(singlePath)
-  const parsedWeekends = JSON.parse(longWeekends)
   return {
     props: {
-      parsedWeekends,
+      longWeekends,
       holidays,
     },
   }
@@ -53,8 +52,8 @@ interface SingleWeekend {
   needBridgeDay: boolean
 }
 
-const Main: React.FC<{ parsedWeekends: SingleWeekend[]; holidays: HolidayObjectProp[] }> = ({
-  parsedWeekends,
+const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectProp[] }> = ({
+  longWeekends,
   holidays,
 }) => {
   const onlyDates = (array: HolidayObjectProp[]) => {
@@ -104,7 +103,7 @@ const Main: React.FC<{ parsedWeekends: SingleWeekend[]; holidays: HolidayObjectP
 
   return (
     <Container>
-      {parsedWeekends.map((weekend: SingleWeekend, index: number) => (
+      {longWeekends.map((weekend: SingleWeekend, index: number) => (
         <div key={index}>
           <p className="weekend-title">Long weekend {index + 1}</p>
           <Weekend>

@@ -12,12 +12,14 @@ export function getNextFiveYears() {
 }
 
 export async function fetchHoliday(year: string) {
-  const response = await fetch(`https://date.nager.at/api/v2/publicholidays/${year}/NO`,{
   // const response = await fetch(`http://localhost:3001/allHolidays?year=${year}`, {
+  const response = await fetch(`https://date.nager.at/api/v2/publicholidays/${year}/NO`, {
     headers: { Accept: 'application/json' },
   })
 
-  return response.json()
+  const data = await response.json()
+
+  return data;
 }
 
 export async function fetchLongWeekend(year: string) {
@@ -25,5 +27,8 @@ export async function fetchLongWeekend(year: string) {
   const response = await fetch(`https://date.nager.at/api/v2/LongWeekend/${year}/NO`, {
     headers: { Accept: 'application/json' },
   })
-  return response.json()
+
+  const data = await response.json()
+
+  return data;
 }
