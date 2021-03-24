@@ -1,10 +1,14 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 export const Layout = styled.div`
   min-height: 100vh;
 `
 
-export const LinkButton = styled.a`
+export const LinkButtonContainer = styled.div`
+  display: flex;
+`
+
+const buttonAndLinkStyles = css`
   display: inline-block;
   border: none;
   padding: 1rem;
@@ -34,6 +38,14 @@ export const LinkButton = styled.a`
   }
 `
 
+export const LinkButton = styled.a`
+  ${buttonAndLinkStyles}
+`
+
+export const DownloadButton = styled.button`
+  ${buttonAndLinkStyles}
+`
+
 export const Container = styled.div`
   width: 90%;
   height: auto;
@@ -45,7 +57,6 @@ export const Container = styled.div`
 export const Weekend = styled.div`
   margin: 1em 0;
   display: flex;
-  align-self: center;
   flex-wrap: wrap;
 
   .single-day {
