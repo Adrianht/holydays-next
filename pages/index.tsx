@@ -1,16 +1,7 @@
-import { Layout } from '@/styles'
-import { getNextFiveYears } from '@/lib/helpers'
+import LinkButtons from '@/components/LinkButtons'
 
 const IndexPage = () => {
-  const years = getNextFiveYears()
-
-  return (
-    <Layout>
-      {years.map((year, index) => (
-        <button key={index}>{year}</button>
-      ))}
-    </Layout>
-  )
+  return <LinkButtons />
 }
 
 export default IndexPage

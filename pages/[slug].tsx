@@ -1,5 +1,6 @@
+import LinkButtons from '@/components/LinkButtons'
 import { fetchHoliday, fetchLongWeekend, getNextFiveYears } from '@/lib/helpers'
-import { Container, Weekend } from '@/styles'
+import { Container, DownloadButton, Weekend } from '@/styles'
 import { format, parseISO, eachDayOfInterval, isWeekend } from 'date-fns'
 import { GetStaticProps } from 'next'
 
@@ -101,8 +102,67 @@ const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectPro
     return 'bridge-day'
   }
 
+  function dayIsBridge(weekend: any, day: any) {
+    const currentDay = format(day, 'dd/MM/yyyy')
+    const onlyDays = onlyDates(holidays)
+    const exists = onlyDays.includes(currentDay)
+
+    if (exists) {
+      return false
+    }
+    const checkWeekend = isWeekend(day)
+    if (checkWeekend) {
+      return false
+    }
+    return true
+  }
+
+  interface ExportDatesProps {
+    day: Date
+    bridge: boolean
+  }
+
+  const icsExport = () => {
+
+    //@ts-ignore
+    const cal = ics()
+    const exportAbleDates: any = []
+    longWeekends.forEach((weekend) => {
+      const allDaysInWeekend = allDays(weekend)
+      allDaysInWeekend.forEach((day) => {
+        const dayIsb = dayIsBridge(allDaysInWeekend, day)
+        exportAbleDates.push({
+          day,
+          bridge: dayIsb,
+        })
+      })
+    })
+    exportAbleDates.forEach((day: ExportDatesProps) => {
+      const formattedDay = format(day.day, 'MM/dd/yyyy')
+      if (day.bridge) {
+        cal.addEvent(
+          'Long Weekend! (BRIDGE-DAY)',
+          'If you use a vacation-day here you will get a long weekend! Exported from holydays.adrianht.no',
+          'Holyday',
+          formattedDay,
+          formattedDay
+        )
+      } else {
+        cal.addEvent(
+          'Long Weekend!',
+          'Part of a long weekend! Exported from holydays.adrianht.no',
+          'Holyday',
+          formattedDay,
+          formattedDay
+        )
+      }
+    })
+    cal.download()
+  }
+
   return (
     <Container>
+      <LinkButtons />
       {longWeekends.map((weekend: SingleWeekend, index: number) => (
         <div key={index}>
           <p className="weekend-title">Long weekend {index + 1}</p>
@@ -115,6 +175,7 @@ const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectPro
           </Weekend>
         </div>
       ))}
+      <DownloadButton onClick={icsExport}>Export weekends to ics file</DownloadButton>
     </Container>
   )
 }
