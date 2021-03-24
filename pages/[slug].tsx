@@ -1,117 +1,123 @@
-import { fetchHoliday, fetchLongWeekend, getNextFiveYears } from "@/lib/helpers";
-import { Container, Weekend } from "@/styles";
-import { format, parseISO, eachDayOfInterval, isWeekend } from "date-fns";
-import { GetStaticProps } from "next";
+import { fetchHoliday, fetchLongWeekend, getNextFiveYears } from '@/lib/helpers'
+import { Container, Weekend } from '@/styles'
+import { format, parseISO, eachDayOfInterval, isWeekend } from 'date-fns'
+import { GetStaticProps } from 'next'
 
 export async function getStaticPaths() {
-  const paths = getNextFiveYears();
-  const pathToString = paths.map(String);
-  const newPaths = [];
-  for (let slug of pathToString) {
-    newPaths.push({params: {slug: slug}})
+  const paths = getNextFiveYears()
+  const pathToString = paths.map(String)
+  const newPaths = []
+  for (const slug of pathToString) {
+    newPaths.push({ params: { slug: slug } })
   }
   return {
     paths: newPaths,
-    fallback: false
+    fallback: false,
   }
 }
 
-export const getStaticProps: GetStaticProps<{parsedWeekends: SingleWeekend[], holidays: HolidayObjectProp[]}> = async ({params}) => {
+export const getStaticProps: GetStaticProps<{
+  parsedWeekends: SingleWeekend[]
+  holidays: HolidayObjectProp[]
+}> = async ({ params }) => {
+  // eslint-disable-next-line
   const path = params?.slug!
-  const singlePath = Array.isArray(path) ? path[0] : path;
+  const singlePath = Array.isArray(path) ? path[0] : path
   const longWeekends = await fetchLongWeekend(singlePath)
   const holidays = await fetchHoliday(singlePath)
-  const parsedWeekends = JSON.parse(longWeekends);
+  const parsedWeekends = JSON.parse(longWeekends)
   return {
     props: {
       parsedWeekends,
-      holidays
-    }
+      holidays,
+    },
   }
 }
 
 interface HolidayObjectProp {
-    date: string,
-    localName: string,
-    name: string,
-    countryCode: string,
-    fixed: boolean,
-    global: boolean,
-    counties?: any,
-    launchYear?: any,
-    type: string
+  date: string
+  localName: string
+  name: string
+  countryCode: string
+  fixed: boolean
+  global: boolean
+  counties?: any
+  launchYear?: any
+  type: string
 }
 
 interface SingleWeekend {
-  startDate: string,
-  endDate: string,
-  dayCount: number,
+  startDate: string
+  endDate: string
+  dayCount: number
   needBridgeDay: boolean
 }
 
-
-const Main: React.FC<{parsedWeekends: SingleWeekend[], holidays: HolidayObjectProp[]}> = ({ parsedWeekends, holidays }) => {
-  console.log("ASDASD", parsedWeekends)
+const Main: React.FC<{ parsedWeekends: SingleWeekend[]; holidays: HolidayObjectProp[] }> = ({
+  parsedWeekends,
+  holidays,
+}) => {
   const onlyDates = (array: HolidayObjectProp[]) => {
-    const dates: string[] = [];
+    const dates: string[] = []
     array.forEach((element: HolidayObjectProp) => {
-      dates.push(format(parseISO(element.date), 'dd/MM/yyyy'));
-    });
-    return dates;
+      dates.push(format(parseISO(element.date), 'dd/MM/yyyy'))
+    })
+    return dates
   }
 
   const dayName = (weekend: SingleWeekend, day: number) => {
-    const all = allDays(weekend);
+    const all = allDays(weekend)
 
-    return format(all[day], 'eeee dd, MMMM');
+    return format(all[day], 'eeee dd, MMMM')
   }
 
   const allDays = (weekend: SingleWeekend) => {
-    const start = parseISO(weekend.startDate);
-    const end = parseISO(weekend.endDate);
-    return eachDayOfInterval({ start, end });
+    const start = parseISO(weekend.startDate)
+    const end = parseISO(weekend.endDate)
+    return eachDayOfInterval({ start, end })
   }
 
-  const dayIsBridgeDay = (weekend:SingleWeekend, day:number) => {
+  const dayIsBridgeDay = (weekend: SingleWeekend, day: number) => {
     if (!weekend.needBridgeDay) {
-      return '';
+      return ''
     }
 
-    const all = allDays(weekend);
-    const currentDay = format(all[day], 'dd/MM/yyyy');
+    const all = allDays(weekend)
+    const currentDay = format(all[day], 'dd/MM/yyyy')
 
     const onlyDays = onlyDates(holidays)
-    const exists = onlyDays.includes(currentDay);
+    const exists = onlyDays.includes(currentDay)
 
     if (exists) {
-      return '';
+      return ''
     }
 
-    const localDay = all[day];
-    const checkWeekend = isWeekend(localDay);
+    const localDay = all[day]
+    const checkWeekend = isWeekend(localDay)
 
     if (checkWeekend) {
-      return '';
+      return ''
     }
 
-    return 'bridge-day';
+    return 'bridge-day'
   }
-  
-  return(
+
+  return (
     <Container>
       {parsedWeekends.map((weekend: SingleWeekend, index: number) => (
         <div key={index}>
           <p className="weekend-title">Long weekend {index + 1}</p>
           <Weekend>
             {[...Array(weekend.dayCount).keys()].map((el) => (
-              <div key={el} className={`single-day ${dayIsBridgeDay(weekend, el)}`}>{dayName(weekend, el)}</div>
+              <div key={el} className={`single-day ${dayIsBridgeDay(weekend, el)}`}>
+                {dayName(weekend, el)}
+              </div>
             ))}
           </Weekend>
         </div>
-
       ))}
     </Container>
   )
 }
 
-export default Main;
+export default Main

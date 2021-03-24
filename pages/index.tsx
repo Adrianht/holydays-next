@@ -1,18 +1,16 @@
-import Head from 'next/head'
-import { Layout } from "@/styles";
-import { getNextFiveYears } from '@/lib/helpers';
+import { Layout } from '@/styles'
+import { getNextFiveYears } from '@/lib/helpers'
 
 const IndexPage = () => {
-
-  let years = getNextFiveYears();
+  const years = getNextFiveYears()
 
   return (
     <Layout>
-      {years.map((year) => (
-        <button>{year}</button>
+      {years.map((year, index) => (
+        <button key={index}>{year}</button>
       ))}
     </Layout>
   )
 }
 
-export default IndexPage;
+export default IndexPage

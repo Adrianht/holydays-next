@@ -1,10 +1,8 @@
-import styled from "styled-components";
-
+import styled from 'styled-components'
 
 export const Layout = styled.div`
   min-height: 100vh;
 `
-
 
 export const Container = styled.div`
   width: 90%;
@@ -32,4 +30,4 @@ export const Weekend = styled.div`
       border: 1px solid yellow;
     }
   }
-`;
+`

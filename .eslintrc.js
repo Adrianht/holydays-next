@@ -31,6 +31,13 @@ module.exports = {
         // We will use TypeScript's types for component props instead
         'react/prop-types': 'off',
 
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+
+        "react/self-closing-comp": ["error", {
+          "component": true,
+          "html": true
+        }],
+
         // No need to import React when using Next.js
         'react/react-in-jsx-scope': 'off',
 
