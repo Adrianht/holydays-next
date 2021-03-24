@@ -1,15 +1,18 @@
-import { Layout } from '@/styles'
 import { getNextFiveYears } from '@/lib/helpers'
+import { LinkButton } from '@/styles'
+import Link from 'next/link'
 
 const IndexPage = () => {
   const years = getNextFiveYears()
 
   return (
-    <Layout>
-      {years.map((year, index) => (
-        <button key={index}>{year}</button>
+    <>
+      {years.map((year) => (
+        <Link href={`/${year}`} key={year}>
+          <LinkButton>{year}</LinkButton>
+        </Link>
       ))}
-    </Layout>
+    </>
   )
 }
 
