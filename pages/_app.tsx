@@ -1,8 +1,9 @@
+import { NextPage } from 'next/'
 import { AppProps } from 'next/app'
 import GlobalStyle from '@/styles/global'
 import Head from 'next/head'
 
-function MyApp({ Component, pageProps }: AppProps) {
+const Holydays: NextPage<AppProps> = ({ Component, pageProps }) => {
   return (
     <>
       <Head>
@@ -14,4 +15,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   )
 }
 
-export default MyApp
+export default Holydays

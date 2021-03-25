@@ -2,9 +2,32 @@ import LinkButtons from '@/components/LinkButtons'
 import { fetchHoliday, fetchLongWeekend, getNextFiveYears } from '@/lib/helpers'
 import { Container, DownloadButton, Weekend } from '@/styles'
 import { format, parseISO, eachDayOfInterval, isWeekend } from 'date-fns'
-import { GetStaticProps } from 'next'
+import { GetStaticProps, GetStaticPaths } from 'next'
+interface HolidayObjectProp {
+  date: string
+  localName: string
+  name: string
+  countryCode: string
+  fixed: boolean
+  global: boolean
+  counties?: string
+  launchYear?: string
+  type: string
+}
 
-export async function getStaticPaths() {
+interface SingleWeekend {
+  startDate: string
+  endDate: string
+  dayCount: number
+  needBridgeDay: boolean
+}
+
+interface ExportDatesProps {
+  day: Date
+  bridge: boolean
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
   const paths = getNextFiveYears()
   const pathToString = paths.map(String)
   const newPaths = []
@@ -34,30 +57,11 @@ export const getStaticProps: GetStaticProps<{
   }
 }
 
-interface HolidayObjectProp {
-  date: string
-  localName: string
-  name: string
-  countryCode: string
-  fixed: boolean
-  global: boolean
-  counties?: any
-  launchYear?: any
-  type: string
-}
-
-interface SingleWeekend {
-  startDate: string
-  endDate: string
-  dayCount: number
-  needBridgeDay: boolean
-}
-
 const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectProp[] }> = ({
   longWeekends,
   holidays,
 }) => {
-  const onlyDates = (array: HolidayObjectProp[]) => {
+  const onlyDates = (array: HolidayObjectProp[]): string[] => {
     const dates: string[] = []
     array.forEach((element: HolidayObjectProp) => {
       dates.push(format(parseISO(element.date), 'dd/MM/yyyy'))
@@ -65,19 +69,19 @@ const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectPro
     return dates
   }
 
-  const dayName = (weekend: SingleWeekend, day: number) => {
+  const dayName = (weekend: SingleWeekend, day: number): string => {
     const all = allDays(weekend)
 
     return format(all[day], 'eeee dd, MMMM')
   }
 
-  const allDays = (weekend: SingleWeekend) => {
+  const allDays = (weekend: SingleWeekend): Date[] => {
     const start = parseISO(weekend.startDate)
     const end = parseISO(weekend.endDate)
     return eachDayOfInterval({ start, end })
   }
 
-  const dayIsBridgeDay = (weekend: SingleWeekend, day: number) => {
+  const dayIsBridgeDay = (weekend: SingleWeekend, day: number): string => {
     if (!weekend.needBridgeDay) {
       return ''
     }
@@ -102,7 +106,7 @@ const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectPro
     return 'bridge-day'
   }
 
-  function dayIsBridge(weekend: any, day: any) {
+  function dayIsBridge(day: Date): boolean {
     const currentDay = format(day, 'dd/MM/yyyy')
     const onlyDays = onlyDates(holidays)
     const exists = onlyDays.includes(currentDay)
@@ -117,20 +121,14 @@ const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectPro
     return true
   }
 
-  interface ExportDatesProps {
-    day: Date
-    bridge: boolean
-  }
-
-  const icsExport = () => {
-
-    //@ts-ignore
+  const icsExport = (): void => {
+    //@ts-ignore eslint-disable-next-line no-console
     const cal = ics()
-    const exportAbleDates: any = []
+    const exportAbleDates: ExportDatesProps[] = []
     longWeekends.forEach((weekend) => {
       const allDaysInWeekend = allDays(weekend)
       allDaysInWeekend.forEach((day) => {
-        const dayIsb = dayIsBridge(allDaysInWeekend, day)
+        const dayIsb = dayIsBridge(day)
         exportAbleDates.push({
           day,
           bridge: dayIsb,

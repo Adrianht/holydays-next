@@ -1,6 +1,6 @@
 import LinkButtons from '@/components/LinkButtons'
 
-const IndexPage = () => {
+const IndexPage: React.FC = () => {
   return <LinkButtons />
 }
 
