@@ -1,8 +1,10 @@
+import Explanation from '@/components/Explanation'
 import LinkButtons from '@/components/LinkButtons'
 import { fetchHoliday, fetchLongWeekend, getNextFiveYears } from '@/lib/helpers'
-import { Container, DownloadButton, Weekend } from '@/styles'
+import { Container, DownloadButton, SingleWeekendContainer, Title, Weekend } from '@/styles'
 import { format, parseISO, eachDayOfInterval, isWeekend } from 'date-fns'
 import { GetStaticProps, GetStaticPaths } from 'next'
+import { useRouter } from 'next/router'
 interface HolidayObjectProp {
   date: string
   localName: string
@@ -158,12 +160,17 @@ const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectPro
     cal.download()
   }
 
+  const router = useRouter()
+  const pid = router.query
+
   return (
     <Container>
       <LinkButtons />
+      <Explanation />
+      <h1>{pid.slug}</h1>
       {longWeekends.map((weekend: SingleWeekend, index: number) => (
-        <div key={index}>
-          <p className="weekend-title">Long weekend {index + 1}</p>
+        <SingleWeekendContainer key={index}>
+          <Title>Long weekend {index + 1}</Title>
           <Weekend>
             {[...Array(weekend.dayCount).keys()].map((el) => (
               <div key={el} className={`single-day ${dayIsBridgeDay(weekend, el)}`}>
@@ -171,7 +178,7 @@ const Main: React.FC<{ longWeekends: SingleWeekend[]; holidays: HolidayObjectPro
               </div>
             ))}
           </Weekend>
-        </div>
+        </SingleWeekendContainer>
       ))}
       <DownloadButton onClick={icsExport}>Export weekends to ics file</DownloadButton>
     </Container>
